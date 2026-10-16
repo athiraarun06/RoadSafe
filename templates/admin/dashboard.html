@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, status, priority %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+{% call head('Operations dashboard', 'Live overview of RoadSafe.') %}<a class="btn btn-outline-primary" href="{{ url_for('admin.reports') }}"><i class="bi bi-bar-chart-line"></i> Full reports</a>{% endcall %}
+<div class="row g-3 mb-4">
+  {% for lbl, val, cls in [('Customers', stats.customers, ''),('Active mechanics', stats.mechanics, ''),('Total requests', stats.requests, ''),('Active now', stats.active, 'warn'),('Unassigned', stats.unassigned, 'danger' if stats.unassigned else ''),('Revenue (paid)', stats.revenue|money, ''),('Outstanding bills', stats.outstanding|money, 'warn'),('Avg rating', stats.avg_rating or '-', '')] %}
+  <div class="col-6 col-lg-3"><div class="stat {{ cls }}"><div class="lbl">{{ lbl }}</div><div class="rs-num">{{ val }}</div></div></div>{% endfor %}
+</div>
+{% if queue %}<div class="rs-card mb-4 border-danger"><div class="rs-card-h text-danger"><span><i class="bi bi-exclamation-octagon-fill"></i> Unassigned requests ({{ queue|length }})</span></div><div class="rs-card-b p-0">
+<ul class="list-group list-group-flush">{% for r in queue %}<li class="list-group-item d-flex justify-content-between align-items-center"><span>{{ priority(r.priority) }} <strong class="ms-2">#{{ r.request_id }} {{ r.service_name }}</strong> <span class="text-muted small">· {{ r.city }} · {{ r.customer_name }} · {{ r.requested_at|dt }}</span></span><a class="btn btn-sm btn-danger" href="{{ url_for('admin.request_detail', rid=r.request_id) }}">Assign</a></li>{% endfor %}</ul></div></div>{% endif %}
+<div class="row g-4 mb-4">
+  <div class="col-lg-4"><div class="rs-card h-100"><div class="rs-card-h">Requests by status</div><div class="rs-card-b" style="height:280px"><canvas id="cStatus"></canvas></div></div></div>
+  <div class="col-lg-4"><div class="rs-card h-100"><div class="rs-card-h">Service demand</div><div class="rs-card-b" style="height:280px"><canvas id="cDemand"></canvas></div></div></div>
+  <div class="col-lg-4"><div class="rs-card h-100"><div class="rs-card-h">Monthly revenue (₹)</div><div class="rs-card-b" style="height:280px"><canvas id="cRev"></canvas></div></div></div>
+</div>
+<div class="rs-card"><div class="rs-card-h">Latest requests <a href="{{ url_for('admin.requests_list') }}" class="small">View all</a></div><div class="rs-card-b p-0">{% with rows=recent, pfx='admin' %}{% include '_request_table.html' %}{% endwith %}</div></div>
+{% endblock %}
+{% block scripts %}<script>
+rsChart('cStatus', 'doughnut', {{ by_status|map(attribute='status')|list|tojson }}, [{data: {{ by_status|map(attribute='n')|list|tojson }}}]);
+rsChart('cDemand', 'bar', {{ demand|map(attribute='service_name')|list|tojson }}, [{label: 'Requests', data: {{ demand|map(attribute='total_requests')|list|tojson }}}], {indexAxis: 'y'});
+rsChart('cRev', 'line', {{ monthly|map(attribute='month')|list|tojson }}, [{label: 'Revenue', data: {{ monthly|map(attribute='revenue')|map('float')|list|tojson }}, tension: .3, fill: false}]);
+</script>{% endblock %}

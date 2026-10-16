@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}{{ 'Edit' if edit else 'Add' }} mechanic{% endblock %}
+{% block content %}
+{{ head('Edit mechanic' if edit else 'Add mechanic') }}
+<div class="rs-card" style="max-width:780px"><div class="rs-card-b"><form method="post" class="row g-3">
+  <div class="col-md-6"><label class="form-label">Full name *</label><input name="full_name" class="form-control" value="{{ m.full_name if m }}" required></div>
+  <div class="col-md-6"><label class="form-label">Email *</label><input type="email" name="email" class="form-control" value="{{ m.email if m }}" {{ 'disabled' if edit else 'required' }}></div>
+  <div class="col-md-4"><label class="form-label">Phone *</label><input name="phone" class="form-control" value="{{ m.phone if m }}" minlength="7" maxlength="15" required></div>
+  <div class="col-md-4"><label class="form-label">City *</label><input name="city" class="form-control" value="{{ m.city if m }}" required></div>
+  <div class="col-md-4"><label class="form-label">Experience (years) *</label><input type="number" name="experience_years" min="0" max="60" class="form-control" value="{{ m.experience_years if m else 0 }}" required></div>
+  <div class="col-12"><label class="form-label">{{ 'New password (leave blank to keep)' if edit else 'Password *' }}</label><input type="password" name="password" class="form-control" minlength="6" {{ '' if edit else 'required' }}></div>
+  <div class="col-12"><label class="form-label">Services this mechanic can perform</label><div class="row g-2">
+    {% for s in services %}<div class="col-6 col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="services" value="{{ s.service_id }}" id="sv{{ s.service_id }}" {{ 'checked' if s.service_id in chosen }}><label class="form-check-label" for="sv{{ s.service_id }}">{{ s.service_name }}</label></div></div>{% endfor %}</div></div>
+  <div class="col-12 d-flex gap-2"><button class="btn btn-primary">Save mechanic</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.mechanics') }}">Cancel</a></div>
+</form></div></div>
+{% endblock %}

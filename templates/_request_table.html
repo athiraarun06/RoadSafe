@@ -1,0 +1,22 @@
+{# expects: rows, pfx ('customer'|'mechanic'|'admin') #}
+{% from '_macros.html' import status, priority, empty %}
+{% if rows %}
+<div class="table-wrap"><table class="table rs-table table-hover">
+  <thead><tr><th>#</th><th>Service</th>{% if pfx != 'customer' %}<th>Customer</th>{% endif %}<th>Vehicle</th><th>City</th><th>Priority</th><th>Status</th>{% if pfx != 'mechanic' %}<th>Mechanic</th>{% endif %}<th>Requested</th><th></th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr>
+    <td class="fw-bold">#{{ r.request_id }}</td>
+    <td><i class="bi {{ r.service_icon }} text-success me-1"></i>{{ r.service_name }}</td>
+    {% if pfx != 'customer' %}<td>{{ r.customer_name }}</td>{% endif %}
+    <td>{{ r.vehicle_name }}<div class="small text-muted">{{ r.registration_no }}</div></td>
+    <td>{{ r.city }}</td>
+    <td>{{ priority(r.priority) }}</td>
+    <td>{{ status(r.status) }}</td>
+    {% if pfx != 'mechanic' %}<td>{{ r.mechanic_name or '-' }}</td>{% endif %}
+    <td class="small">{{ r.requested_at|dt }}</td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for(pfx + '.request_detail', rid=r.request_id) }}">View</a></td>
+  </tr>
+  {% endfor %}
+  </tbody></table></div>
+{% else %}{{ empty('No requests found.') }}{% endif %}

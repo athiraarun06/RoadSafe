@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, stars %}
+{% block title %}Mechanics{% endblock %}
+{% block content %}
+{% call head('Mechanics', 'Performance, availability and account control.') %}<a class="btn btn-primary" href="{{ url_for('admin.mechanic_form') }}"><i class="bi bi-person-plus"></i> Add mechanic</a>{% endcall %}
+<div class="rs-card"><div class="rs-card-b p-0"><div class="table-wrap"><table class="table rs-table table-hover"><thead><tr><th>#</th><th>Mechanic</th><th>City</th><th>Exp.</th><th>Rating</th><th>Active jobs</th><th>Completed</th><th>Earnings</th><th>Availability</th><th>Account</th><th></th></tr></thead><tbody>
+{% for m in rows %}<tr><td>{{ m.mechanic_id }}</td><td class="fw-semibold">{{ m.full_name }}<div class="small text-muted fw-normal">{{ m.email }}</div></td><td>{{ m.city }}</td><td>{{ m.experience_years }} yr</td><td>{{ m.avg_rating }} <i class="bi bi-star-fill star on"></i></td><td>{{ m.active_jobs }}</td><td>{{ m.completed_jobs }}</td><td>{{ m.total_earnings|money }}</td>
+<td><span class="rs-badge {{ 'st-COMPLETED' if m.is_available else 'st-CANCELLED' }}">{{ 'Online' if m.is_available else 'Offline' }}</span></td>
+<td><span class="rs-badge {{ 'st-COMPLETED' if m.is_active else 'pr-EMERGENCY' }}">{{ 'Active' if m.is_active else 'Disabled' }}</span></td>
+<td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.mechanic_form', mid=m.mechanic_id) }}">Edit</a>
+<form class="d-inline" method="post" action="{{ url_for('admin.mechanic_toggle', mid=m.mechanic_id) }}" data-confirm="Change this mechanic's account status?"><button class="btn btn-sm btn-outline-secondary">{{ 'Disable' if m.is_active else 'Enable' }}</button></form></td></tr>{% endfor %}
+</tbody></table></div></div></div>
+{% endblock %}

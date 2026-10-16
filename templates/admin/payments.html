@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, pay_status, empty %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+{{ head('Payments', 'Monitor bills and collections.') }}
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat"><div class="lbl">Collected</div><div class="rs-num">{{ totals.paid|money }}</div></div></div>
+  <div class="col-md-4"><div class="stat warn"><div class="lbl">Outstanding</div><div class="rs-num">{{ totals.pending|money }}</div></div></div>
+  <div class="col-md-4"><div class="stat"><div class="lbl">By method</div>{% for m in methods %}<span class="badge text-bg-light border me-1">{{ m.payment_method }}: {{ m.n }} · {{ m.amount|money }}</span>{% endfor %}</div></div>
+</div>
+<div class="mb-3 d-flex gap-2">{% for k, l in [('','All'),('PAID','Paid'),('PENDING','Pending')] %}<a class="btn btn-sm {{ 'btn-primary' if status == k else 'btn-outline-primary' }}" href="?status={{ k }}">{{ l }}</a>{% endfor %}</div>
+<div class="rs-card"><div class="rs-card-b p-0">{% if rows %}<div class="table-wrap"><table class="table rs-table table-hover"><thead><tr><th>Request</th><th>Customer</th><th>Service</th><th>Mechanic</th><th>Service</th><th>Parts</th><th>Total</th><th>Status</th><th>Method</th><th>Reference</th><th>Paid on</th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a href="{{ url_for('admin.request_detail', rid=r.request_id) }}">#{{ r.request_id }}</a></td><td>{{ r.customer_name }}</td><td>{{ r.service_name }}</td><td>{{ r.mechanic_name }}</td><td>{{ r.service_charge|money }}</td><td>{{ r.parts_charge|money }}</td><td class="fw-bold">{{ r.total_amount|money }}</td><td>{{ pay_status(r.payment_status) }}</td><td>{{ r.payment_method or '-' }}</td><td class="small font-monospace">{{ r.transaction_ref or '-' }}</td><td class="small">{{ r.paid_at|dt('%d %b %Y') }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}{{ empty('No payments found.') }}{% endif %}</div></div>
+{% endblock %}

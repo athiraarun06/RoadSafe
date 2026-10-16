@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, stars, empty %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+{% call head('Customer feedback', summary.n ~ ' reviews · average ' ~ (summary.avg or '-')) %}
+<div class="btn-group">{% for i in [0,5,4,3,2,1] %}<a class="btn btn-sm {{ 'btn-primary' if (rating or 0) == i else 'btn-outline-primary' }}" href="?rating={{ i if i else '' }}">{{ 'All' if i == 0 else i ~ '★' }}</a>{% endfor %}</div>{% endcall %}
+<div class="rs-card"><div class="rs-card-b p-0">{% if rows %}<ul class="list-group list-group-flush">{% for r in rows %}<li class="list-group-item"><div class="d-flex justify-content-between flex-wrap"><div><strong>{{ r.customer_name }}</strong> <span class="text-muted">rated</span> <strong>{{ r.mechanic_name }}</strong></div><div>{{ stars(r.rating) }}</div></div><div>{{ r.feedback_comments or 'No comment.' }}</div><div class="small text-muted">#{{ r.request_id }} · {{ r.service_name }} · {{ r.completed_at|dt('%d %b %Y') }}</div></li>{% endfor %}</ul>{% else %}{{ empty('No feedback found.') }}{% endif %}</div></div>
+{% endblock %}

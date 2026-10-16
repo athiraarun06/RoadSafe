@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}{{ 'Edit' if edit else 'Add' }} vehicle{% endblock %}
+{% block content %}
+{{ head('Edit vehicle' if edit else 'Add a vehicle') }}
+<div class="rs-card" style="max-width:760px"><div class="rs-card-b">
+<form method="post" class="row g-3">
+  <div class="col-md-6"><label class="form-label">Registration number *</label><input name="registration_no" class="form-control text-uppercase" value="{{ v.registration_no if v }}" placeholder="TN09AB1234" required></div>
+  <div class="col-md-6"><label class="form-label">Vehicle type *</label><select name="vehicle_type" class="form-select">{% for t in types %}<option value="{{ t }}" {{ 'selected' if v and v.vehicle_type == t }}>{{ t|pretty }}</option>{% endfor %}</select></div>
+  <div class="col-md-6"><label class="form-label">Make *</label><input name="make" class="form-control" value="{{ v.make if v }}" required></div>
+  <div class="col-md-6"><label class="form-label">Model *</label><input name="model" class="form-control" value="{{ v.model if v }}" required></div>
+  <div class="col-md-4"><label class="form-label">Year *</label><input type="number" name="manufacture_year" class="form-control" min="1980" max="2100" value="{{ v.manufacture_year if v }}" required></div>
+  <div class="col-md-4"><label class="form-label">Fuel *</label><select name="fuel_type" class="form-select">{% for t in fuels %}<option value="{{ t }}" {{ 'selected' if v and v.fuel_type == t }}>{{ t|pretty }}</option>{% endfor %}</select></div>
+  <div class="col-md-4"><label class="form-label">Colour</label><input name="color" class="form-control" value="{{ v.color or '' if v }}"></div>
+  <div class="col-12 d-flex gap-2"><button class="btn btn-primary">Save vehicle</button><a href="{{ url_for('customer.vehicles') }}" class="btn btn-outline-secondary">Cancel</a></div>
+</form></div></div>
+{% endblock %}

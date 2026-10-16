@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}Rate service{% endblock %}
+{% block content %}
+{{ head('Rate your service', '#' ~ r.request_id ~ ' · ' ~ r.service_name ~ ' by ' ~ r.mechanic_name) }}
+<div class="rs-card" style="max-width:560px"><div class="rs-card-b">
+<form method="post">
+  <label class="form-label d-block">Your rating *</label>
+  <div class="rating-input mb-3">{% for i in [5,4,3,2,1] %}<input type="radio" name="rating" id="st{{ i }}" value="{{ i }}" required><label for="st{{ i }}"><i class="bi bi-star-fill"></i></label>{% endfor %}</div>
+  <div class="mb-3"><label class="form-label">Comments</label><textarea name="comments" rows="4" maxlength="500" class="form-control" placeholder="Tell us how it went…"></textarea></div>
+  <button class="btn btn-primary">Submit feedback</button> <a href="{{ url_for('customer.feedback_list') }}" class="btn btn-outline-secondary">Cancel</a>
+</form></div></div>
+{% endblock %}

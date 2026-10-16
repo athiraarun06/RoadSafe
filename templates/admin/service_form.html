@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}{{ 'Edit' if edit else 'Add' }} service{% endblock %}
+{% block content %}
+{{ head('Edit service' if edit else 'Add service') }}
+<div class="rs-card" style="max-width:640px"><div class="rs-card-b"><form method="post" class="row g-3">
+  <div class="col-md-8"><label class="form-label">Service name *</label><input name="service_name" class="form-control" value="{{ s.service_name if s }}" required></div>
+  <div class="col-md-4"><label class="form-label">Base charge (₹) *</label><input type="number" step="0.01" min="0" name="base_charge" class="form-control" value="{{ s.base_charge if s }}" required></div>
+  <div class="col-12"><label class="form-label">Description</label><input name="description" class="form-control" maxlength="255" value="{{ s.description or '' if s }}"></div>
+  <div class="col-md-6"><label class="form-label">Bootstrap icon class</label><input name="icon" class="form-control" value="{{ s.icon if s else 'bi-tools' }}"></div>
+  <div class="col-12 d-flex gap-2"><button class="btn btn-primary">Save service</button><a class="btn btn-outline-secondary" href="{{ url_for('admin.services') }}">Cancel</a></div>
+</form></div></div>
+{% endblock %}

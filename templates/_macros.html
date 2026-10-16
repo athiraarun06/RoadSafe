@@ -1,0 +1,20 @@
+{% macro status(s) %}<span class="rs-badge st-{{ s }}">{{ s|pretty }}</span>{% endmacro %}
+{% macro priority(p) %}<span class="rs-badge pr-{{ p }}">{{ p|pretty }}</span>{% endmacro %}
+{% macro pay_status(s) %}{% if s %}<span class="rs-badge st-{{ 'PAID' if s == 'PAID' else 'PENDING' if s == 'PENDING' else 'FAILED' }}">{{ s|pretty }}</span>{% else %}<span class="text-muted">-</span>{% endif %}{% endmacro %}
+{% macro stars(n) %}{% for i in range(1, 6) %}<i class="bi bi-star-fill star {{ 'on' if n and i <= n }}"></i>{% endfor %}{% endmacro %}
+{% macro head(title, sub='') %}
+<div class="page-head"><div><h1>{{ title }}</h1>{% if sub %}<p>{{ sub }}</p>{% endif %}</div><div>{{ caller() if caller }}</div></div>
+{% endmacro %}
+{% macro empty(msg, icon='bi-inbox') %}
+<div class="text-center text-muted py-5"><i class="bi {{ icon }} display-5 d-block mb-2"></i>{{ msg }}</div>
+{% endmacro %}
+{% macro tracker(current) %}
+{% set idx = STATUS_FLOW.index(current) if current in STATUS_FLOW else -1 %}
+<div class="tracker">
+{% for s in STATUS_FLOW %}
+  <div class="step {{ 'done' if loop.index0 < idx or current == 'COMPLETED' else 'now' if loop.index0 == idx else '' }}">
+    <div class="dot">{% if loop.index0 < idx or current == 'COMPLETED' %}<i class="bi bi-check-lg"></i>{% else %}{{ loop.index }}{% endif %}</div>{{ s|pretty }}
+  </div>
+{% endfor %}
+</div>
+{% endmacro %}

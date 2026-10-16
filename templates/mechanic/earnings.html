@@ -1,0 +1,17 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty, pay_status %}
+{% block title %}Earnings{% endblock %}
+{% block content %}
+{{ head('Earnings', 'Money received from paid bills.') }}
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat"><div class="lbl">Total earned</div><div class="rs-num">{{ me.total_earnings|money }}</div></div></div>
+  <div class="col-md-4"><div class="stat warn"><div class="lbl">Awaiting payment</div><div class="rs-num">{{ pending.amount|money }}</div><small class="text-muted">{{ pending.n }} bill(s)</small></div></div>
+  <div class="col-md-4"><div class="stat"><div class="lbl">Jobs completed</div><div class="rs-num">{{ me.completed_jobs }}</div></div></div>
+</div>
+<div class="rs-card mb-4"><div class="rs-card-h">Monthly earnings</div><div class="rs-card-b" style="height:300px"><canvas id="chart"></canvas></div></div>
+<div class="rs-card"><div class="rs-card-h">Bills</div><div class="rs-card-b p-0">
+{% if rows %}<div class="table-wrap"><table class="table rs-table"><thead><tr><th>#</th><th>Service</th><th>Customer</th><th>Amount</th><th>Status</th><th>Method</th><th>Paid on</th></tr></thead><tbody>
+{% for r in rows %}<tr><td>#{{ r.request_id }}</td><td>{{ r.service_name }}</td><td>{{ r.customer_name }}</td><td class="fw-bold">{{ r.total_amount|money }}</td><td>{{ pay_status(r.payment_status) }}</td><td>{{ r.payment_method or '-' }}</td><td class="small">{{ r.paid_at|dt }}</td></tr>{% endfor %}</tbody></table></div>{% else %}{{ empty('No bills yet.') }}{% endif %}</div></div>
+{% endblock %}
+{% block scripts %}<script>
+rsChart('chart', 'bar', {{ monthly|map(attribute='month')|list|tojson }}, [{label: 'Earned (₹)', data: {{ monthly|map(attribute='earned')|map('float')|list|tojson }}}]);
+</script>{% endblock %}

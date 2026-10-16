@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% set layout = 'public' %}
+{% block public %}
+<div class="auth-wrap"><div class="text-center"><div class="display-1 rs-num fw-bold text-success">{{ code }}</div>
+<p class="lead">{{ message }}</p><a href="{{ url_for('main.index') }}" class="btn btn-primary">Back to home</a></div></div>
+{% endblock %}

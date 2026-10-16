@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% set layout = 'public' %}
+{% block title %}Login{% endblock %}
+{% block public %}
+<div class="auth-wrap"><div class="auth-card">
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="alert alert-{{ cat }}">{{ m }}</div>{% endfor %}{% endwith %}
+  <div class="rs-card"><div class="rs-card-b p-4">
+    <h3 class="fw-bold mb-1">Welcome back</h3><p class="text-muted">Log in to your RoadSafe account.</p>
+    <form method="post">
+      <div class="btn-group w-100 mb-3 role-pick" role="group">
+        {% for r, ic in [('customer','bi-person'),('mechanic','bi-wrench'),('admin','bi-shield-lock')] %}
+        <input type="radio" class="btn-check" name="role" id="r-{{ r }}" value="{{ r }}" {{ 'checked' if role == r }}>
+        <label class="btn btn-outline-primary" for="r-{{ r }}"><i class="bi {{ ic }}"></i> {{ r|title }}</label>
+        {% endfor %}
+      </div>
+      <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required autofocus></div>
+      <div class="mb-3"><label class="form-label">Password</label><input type="password" name="password" class="form-control" required></div>
+      <button class="btn btn-primary w-100 py-2">Log in</button>
+    </form>
+    <hr><p class="small text-muted mb-1">New customer? <a href="{{ url_for('main.register') }}">Create an account</a></p>
+    <p class="small text-muted mb-0">Demo password for all sample users: <code>Password@123</code></p>
+  </div></div>
+</div></div>
+{% endblock %}

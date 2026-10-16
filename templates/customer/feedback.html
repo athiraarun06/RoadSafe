@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty, stars %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+{{ head('Feedback & ratings', 'Your ratings help us recommend better mechanics.') }}
+<div class="rs-card mb-4"><div class="rs-card-h">Waiting for your rating</div><div class="rs-card-b p-0">
+{% if pending %}<ul class="list-group list-group-flush">{% for r in pending %}<li class="list-group-item d-flex justify-content-between align-items-center"><span><strong>#{{ r.request_id }}</strong> {{ r.service_name }} by {{ r.mechanic_name }} <span class="text-muted small">· {{ r.completed_at|dt('%d %b %Y') }}</span></span><a class="btn btn-sm btn-primary" href="{{ url_for('customer.feedback_form', rid=r.request_id) }}">Rate</a></li>{% endfor %}</ul>
+{% else %}{{ empty('Nothing to rate right now.', 'bi-emoji-smile') }}{% endif %}</div></div>
+<div class="rs-card"><div class="rs-card-h">Feedback you have given</div><div class="rs-card-b p-0">
+{% if given %}<ul class="list-group list-group-flush">{% for r in given %}<li class="list-group-item"><div class="d-flex justify-content-between"><strong>{{ r.service_name }} · {{ r.mechanic_name }}</strong><span>{{ stars(r.rating) }}</span></div><div class="small text-muted">{{ r.feedback_comments or 'No comment.' }}</div></li>{% endfor %}</ul>
+{% else %}{{ empty('You have not rated any service yet.') }}{% endif %}</div></div>
+{% endblock %}

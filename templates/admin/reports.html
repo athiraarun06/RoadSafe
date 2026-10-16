@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+{{ head('Reports & statistics', 'Powered by JOIN, GROUP BY, HAVING, views and stored procedures.') }}
+<div class="rs-card mb-4"><div class="rs-card-h">Revenue by service <code class="small">CALL sp_revenue_report(from, to)</code></div><div class="rs-card-b">
+  <form class="row g-2 mb-3" method="get"><div class="col-auto"><input type="date" name="from" value="{{ d_from }}" class="form-control"></div><div class="col-auto"><input type="date" name="to" value="{{ d_to }}" class="form-control"></div><div class="col-auto"><button class="btn btn-primary">Run report</button></div></form>
+  <div class="row g-4"><div class="col-lg-7">{% if revenue_rows %}<div class="table-wrap"><table class="table rs-table"><thead><tr><th>Service</th><th>Requests</th><th>Completed</th><th>Revenue</th><th>Avg bill</th></tr></thead><tbody>
+    {% for r in revenue_rows %}<tr><td>{{ r.service_name }}</td><td>{{ r.total_requests }}</td><td>{{ r.completed }}</td><td class="fw-bold">{{ r.revenue|money }}</td><td>{{ r.avg_bill|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}{{ empty('No requests in this period.') }}{% endif %}</div>
+  <div class="col-lg-5" style="height:280px"><canvas id="cService"></canvas></div></div></div></div>
+<div class="row g-4 mb-4">
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">Monthly revenue</div><div class="rs-card-b" style="height:280px"><canvas id="cMonthly"></canvas></div></div></div>
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">Requests by priority</div><div class="rs-card-b" style="height:280px"><canvas id="cPriority"></canvas></div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">City performance</div><div class="rs-card-b p-0"><table class="table rs-table"><thead><tr><th>City</th><th>Requests</th><th>Emergencies</th><th>Revenue</th></tr></thead><tbody>{% for c in cities %}<tr><td>{{ c.city }}</td><td>{{ c.requests }}</td><td>{{ c.emergencies }}</td><td>{{ c.revenue|money }}</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">Top mechanics <span class="small text-muted">HAVING jobs ≥ 2 AND rating ≥ 4</span></div><div class="rs-card-b p-0"><table class="table rs-table"><thead><tr><th>Mechanic</th><th>City</th><th>Rated jobs</th><th>Avg rating</th></tr></thead><tbody>{% for m in mech %}<tr><td>{{ m.full_name }}</td><td>{{ m.city }}</td><td>{{ m.jobs }}</td><td>{{ m.avg_rating }}</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">Best customers <span class="small text-muted">HAVING requests ≥ 2</span></div><div class="rs-card-b p-0"><table class="table rs-table"><thead><tr><th>Customer</th><th>City</th><th>Requests</th><th>Spent</th></tr></thead><tbody>{% for c in top_customers %}<tr><td>{{ c.full_name }}</td><td>{{ c.city }}</td><td>{{ c.requests }}</td><td>{{ c.spent|money }}</td></tr>{% endfor %}</tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="stat h-100"><div class="lbl">Average time to complete a rescue</div><div class="rs-num">{{ avg_response.avg_minutes or '-' }} min</div><small class="text-muted">AVG(TIMESTAMPDIFF) over completed requests</small></div></div>
+</div>
+{% endblock %}
+{% block scripts %}<script>
+rsChart('cService', 'doughnut', {{ revenue_rows|map(attribute='service_name')|list|tojson }}, [{data: {{ revenue_rows|map(attribute='revenue')|map('float')|list|tojson }}}]);
+rsChart('cMonthly', 'bar', {{ monthly|map(attribute='month')|list|tojson }}, [{label: 'Revenue (₹)', data: {{ monthly|map(attribute='revenue')|map('float')|list|tojson }}}, {label: 'Payments', data: {{ monthly|map(attribute='payments_count')|list|tojson }}}]);
+rsChart('cPriority', 'pie', {{ priorities|map(attribute='priority')|list|tojson }}, [{data: {{ priorities|map(attribute='n')|list|tojson }}}]);
+</script>{% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}My requests{% endblock %}
+{% block content %}
+{{ head('My requests', 'Requests assigned to you.') }}
+<div class="mb-3 d-flex gap-2">{% for k, l in [('active','Active'),('history','Finished'),('all','All incl. rejected')] %}<a class="btn btn-sm {{ 'btn-primary' if flt == k else 'btn-outline-primary' }}" href="?filter={{ k }}">{{ l }}</a>{% endfor %}</div>
+<div class="rs-card"><div class="rs-card-b p-0">{% with pfx='mechanic' %}{% include '_request_table.html' %}{% endwith %}</div></div>
+{% endblock %}

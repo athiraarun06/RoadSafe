@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty, pay_status %}
+{% block title %}Bills{% endblock %}
+{% block content %}
+{{ head('Bills & payments', 'Pay with cash, UPI or card (simulated).') }}
+<div class="rs-card"><div class="rs-card-b p-0">
+{% if rows %}<div class="table-wrap"><table class="table rs-table table-hover"><thead><tr><th>Request</th><th>Service</th><th>Service charge</th><th>Parts</th><th>Total</th><th>Status</th><th>Paid via</th><th></th></tr></thead><tbody>
+{% for r in rows %}<tr><td><a href="{{ url_for('customer.request_detail', rid=r.request_id) }}">#{{ r.request_id }}</a></td><td>{{ r.service_name }}</td><td>{{ r.service_charge|money }}</td><td>{{ r.parts_charge|money }}</td><td class="fw-bold">{{ r.total_amount|money }}</td><td>{{ pay_status(r.payment_status) }}</td><td class="small">{{ r.payment_method or '-' }}{% if r.paid_at %}<div class="text-muted">{{ r.paid_at|dt('%d %b %Y') }}</div>{% endif %}</td>
+<td class="text-end">{% if r.payment_status == 'PENDING' %}<a class="btn btn-sm btn-signal" href="{{ url_for('customer.pay', rid=r.request_id) }}">Pay now</a>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}{{ empty('No bills yet. A bill is generated when a mechanic completes your service.', 'bi-receipt') }}{% endif %}
+</div></div>
+{% endblock %}

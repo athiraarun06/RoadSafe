@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty, stars %}
+{% block title %}Ratings{% endblock %}
+{% block content %}
+{{ head('My ratings', 'What customers say about your work.') }}
+<div class="row g-4"><div class="col-lg-4"><div class="rs-card"><div class="rs-card-b text-center">
+  <div class="rs-num display-3">{{ me.avg_rating }}</div><div class="fs-4">{{ stars(me.avg_rating|round(0)|int) }}</div>
+  <div class="text-start mt-3">{% for i in [5,4,3,2,1] %}<div class="d-flex align-items-center gap-2 small mb-1"><span style="width:14px">{{ i }}</span><i class="bi bi-star-fill star on"></i>
+    <div class="progress flex-grow-1" style="height:8px"><div class="progress-bar bg-warning" style="width: {{ (dist.get(i, 0) / (rows|length) * 100) if rows else 0 }}%"></div></div><span style="width:20px">{{ dist.get(i, 0) }}</span></div>{% endfor %}</div>
+</div></div></div>
+<div class="col-lg-8"><div class="rs-card"><div class="rs-card-b p-0">
+{% if rows %}<ul class="list-group list-group-flush">{% for v in rows %}<li class="list-group-item"><div class="d-flex justify-content-between"><strong>{{ v.customer_name }}</strong><span>{{ stars(v.rating) }}</span></div><div>{{ v.feedback_comments or 'No comment.' }}</div><div class="small text-muted">{{ v.service_name }} · {{ v.completed_at|dt('%d %b %Y') }}</div></li>{% endfor %}</ul>{% else %}{{ empty('No ratings yet.', 'bi-star') }}{% endif %}
+</div></div></div></div>
+{% endblock %}

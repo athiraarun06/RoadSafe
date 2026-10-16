@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+{{ head('Customers', 'Registered customers and their activity.') }}
+<div class="rs-card"><div class="rs-card-b p-0"><div class="table-wrap"><table class="table rs-table table-hover"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>City</th><th>Vehicles</th><th>Requests</th><th>Spent</th><th>Joined</th><th>Status</th><th></th></tr></thead><tbody>
+{% for c in rows %}<tr><td>{{ c.customer_id }}</td><td class="fw-semibold">{{ c.full_name }}</td><td class="small">{{ c.email }}<br>{{ c.phone }}</td><td>{{ c.city or '-' }}</td><td>{{ c.vehicles }}</td><td>{{ c.requests }}</td><td>{{ c.spent|money }}</td><td class="small">{{ c.created_at|dt('%d %b %Y') }}</td>
+<td><span class="rs-badge {{ 'st-COMPLETED' if c.is_active else 'st-CANCELLED' }}">{{ 'Active' if c.is_active else 'Blocked' }}</span></td>
+<td><form method="post" action="{{ url_for('admin.customer_toggle', cid=c.customer_id) }}" data-confirm="Change this customer's access?"><button class="btn btn-sm btn-outline-secondary">{{ 'Block' if c.is_active else 'Unblock' }}</button></form></td></tr>{% endfor %}
+</tbody></table></div></div></div>
+{% endblock %}

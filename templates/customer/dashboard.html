@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% call head('Hello, ' ~ session.name.split(' ')[0], 'Here is what is happening with your vehicles.') %}
+<a class="btn btn-signal" href="{{ url_for('customer.request_new') }}"><i class="bi bi-life-preserver"></i> Request assistance</a>{% endcall %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">My vehicles</div><div class="rs-num">{{ stats.vehicles }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat warn"><div class="lbl">Active requests</div><div class="rs-num">{{ stats.active }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Completed</div><div class="rs-num">{{ stats.completed }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Total spent</div><div class="rs-num">{{ stats.spent|money }}</div></div></div>
+</div>
+{% if stats.unpaid or stats.to_rate %}
+<div class="row g-3 mb-4">
+  {% if stats.unpaid %}<div class="col-md-6"><div class="alert alert-warning d-flex justify-content-between align-items-center mb-0"><span><i class="bi bi-receipt"></i> You have <strong>{{ stats.unpaid }}</strong> unpaid bill(s).</span><a href="{{ url_for('customer.bills') }}" class="btn btn-sm btn-dark">Pay now</a></div></div>{% endif %}
+  {% if stats.to_rate %}<div class="col-md-6"><div class="alert alert-info d-flex justify-content-between align-items-center mb-0"><span><i class="bi bi-star"></i> <strong>{{ stats.to_rate }}</strong> service(s) waiting for your rating.</span><a href="{{ url_for('customer.feedback_list') }}" class="btn btn-sm btn-dark">Rate</a></div></div>{% endif %}
+</div>{% endif %}
+<div class="rs-card"><div class="rs-card-h">Recent requests <a href="{{ url_for('customer.requests_list') }}" class="small">View all</a></div>
+  <div class="rs-card-b p-0">{% with rows=recent, pfx='customer' %}{% include '_request_table.html' %}{% endwith %}</div></div>
+{% endblock %}

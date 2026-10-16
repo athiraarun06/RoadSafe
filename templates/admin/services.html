@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}Services{% endblock %}
+{% block content %}
+{% call head('Services', 'Catalogue, pricing and availability.') %}<a class="btn btn-primary" href="{{ url_for('admin.service_form') }}"><i class="bi bi-plus-lg"></i> Add service</a>{% endcall %}
+<div class="rs-card"><div class="rs-card-b p-0"><div class="table-wrap"><table class="table rs-table table-hover"><thead><tr><th></th><th>Service</th><th>Base charge</th><th>Mechanics</th><th>Requests</th><th>Revenue</th><th>Status</th><th></th></tr></thead><tbody>
+{% for s in rows %}<tr><td><i class="bi {{ s.icon }} fs-4 text-success"></i></td><td class="fw-semibold">{{ s.service_name }}<div class="small text-muted fw-normal">{{ s.description }}</div></td><td>{{ s.base_charge|money }}</td><td>{{ s.mechanics }}</td><td>{{ s.total_requests }}</td><td>{{ s.revenue|money }}</td>
+<td><span class="rs-badge {{ 'st-COMPLETED' if s.is_active else 'st-CANCELLED' }}">{{ 'Available' if s.is_active else 'Hidden' }}</span></td>
+<td class="text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.service_form', sid=s.service_id) }}">Edit</a>
+<form class="d-inline" method="post" action="{{ url_for('admin.service_toggle', sid=s.service_id) }}"><button class="btn btn-sm btn-outline-secondary">{{ 'Hide' if s.is_active else 'Show' }}</button></form></td></tr>{% endfor %}
+</tbody></table></div></div></div>
+{% endblock %}

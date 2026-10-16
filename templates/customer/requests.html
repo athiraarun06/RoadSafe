@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}My requests{% endblock %}
+{% block content %}
+{% call head('Track requests', 'Every assistance request you have made.') %}<a class="btn btn-signal" href="{{ url_for('customer.request_new') }}"><i class="bi bi-plus-lg"></i> New request</a>{% endcall %}
+<div class="mb-3 d-flex flex-wrap gap-2">
+  {% for k, l in [('','All'),('active','Active'),('COMPLETED','Completed'),('CANCELLED','Cancelled')] %}
+  <a class="btn btn-sm {{ 'btn-primary' if status == k else 'btn-outline-primary' }}" href="?status={{ k }}">{{ l }}</a>{% endfor %}
+</div>
+<div class="rs-card"><div class="rs-card-b p-0">{% with pfx='customer' %}{% include '_request_table.html' %}{% endwith %}</div></div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% from '_macros.html' import status %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}RoadSafe{% endblock %} · RoadSafe Roadside Assistance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+{% set role = session.get('role') %}
+{% set NAV = {
+ 'customer': [('customer.dashboard','bi-speedometer2','Dashboard'),('customer.request_new','bi-life-preserver','Request Help'),
+              ('customer.requests_list','bi-geo-alt','Track Requests'),('customer.vehicles','bi-car-front','My Vehicles'),
+              ('customer.bills','bi-receipt','Bills & Payments'),('customer.history','bi-clock-history','Service History'),
+              ('customer.feedback_list','bi-star','Feedback'),('customer.profile','bi-person-circle','Profile')],
+ 'mechanic': [('mechanic.dashboard','bi-speedometer2','Dashboard'),('mechanic.requests_list','bi-wrench-adjustable','My Requests'),
+              ('mechanic.jobs','bi-check2-circle','Completed Jobs'),('mechanic.earnings','bi-cash-coin','Earnings'),
+              ('mechanic.ratings','bi-star','Ratings')],
+ 'admin': [('admin.dashboard','bi-speedometer2','Dashboard'),('admin.requests_list','bi-list-check','Requests'),
+           ('admin.customers','bi-people','Customers'),('admin.mechanics','bi-person-gear','Mechanics'),
+           ('admin.services','bi-tools','Services'),('admin.payments','bi-credit-card','Payments'),
+           ('admin.feedback','bi-chat-heart','Feedback'),('admin.reports','bi-bar-chart-line','Reports')]
+} %}
+<nav class="navbar rs-topbar navbar-dark px-3" style="height:62px">
+  {% if role and layout != 'public' %}<button class="btn btn-sm text-white d-lg-none me-2" data-bs-toggle="offcanvas" data-bs-target="#sidebar"><i class="bi bi-list fs-4"></i></button>{% endif %}
+  <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}"><span class="rs-logo"><i class="bi bi-cone-striped"></i></span>RoadSafe</a>
+  <div class="ms-auto d-flex align-items-center gap-2">
+    {% if role %}
+      {% if layout == 'public' %}<a class="btn btn-sm btn-outline-light" href="{{ url_for(role + '.dashboard') }}">Dashboard</a>{% endif %}
+      <span class="text-white-50 d-none d-md-inline small">{{ session.name }} · <span class="text-uppercase">{{ role }}</span></span>
+      <a class="btn btn-sm btn-signal" href="{{ url_for('main.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+    {% else %}
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('main.login') }}">Login</a>
+      <a class="btn btn-sm btn-signal" href="{{ url_for('main.register') }}">Sign up</a>
+    {% endif %}
+  </div>
+</nav>
+
+{% macro flashes() %}
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}
+    <div class="alert alert-{{ cat }} alert-dismissible fade show alert-auto" role="alert">{{ m }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+  {% endfor %}{% endwith %}
+{% endmacro %}
+
+{% if role and layout != 'public' %}
+<div class="rs-shell">
+  <aside class="rs-sidebar offcanvas-lg offcanvas-start p-3" id="sidebar" style="--bs-offcanvas-bg:#0a3f31">
+    <div class="offcanvas-header d-lg-none px-0"><span class="text-white fw-bold">Menu</span><button class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sidebar"></button></div>
+    <div class="offcanvas-body d-block p-0">
+      <div class="nav-label">{{ role|title }} portal</div>
+      <ul class="nav flex-column gap-1">
+        {% for ep, icon, label in NAV[role] %}
+        <li><a class="nav-link {{ 'active' if request.path.startswith(url_for(ep)) }}" href="{{ url_for(ep) }}"><i class="bi {{ icon }}"></i>{{ label }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </aside>
+  <main class="rs-main">{{ flashes() }}{% block content %}{% endblock %}</main>
+</div>
+{% else %}
+  {% block public %}<div class="container py-4">{{ flashes() }}{% block public_content %}{% endblock %}</div>{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

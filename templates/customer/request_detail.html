@@ -1,0 +1,45 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, status, priority, tracker, stars, pay_status %}
+{% block title %}Request #{{ r.request_id }}{% endblock %}
+{% block content %}
+<div {% if r.status not in ('COMPLETED','CANCELLED') %}data-autorefresh="30"{% endif %}>
+{% call head('Request #' ~ r.request_id, r.service_name ~ ' · ' ~ r.vehicle_name) %}
+  {{ status(r.status) }} {{ priority(r.priority) }}
+  {% if r.status in ('PENDING','ASSIGNED','ACCEPTED') %}
+  <form method="post" action="{{ url_for('customer.request_cancel', rid=r.request_id) }}" class="d-inline" data-confirm="Cancel this request?"><button class="btn btn-sm btn-outline-danger ms-2">Cancel request</button></form>{% endif %}
+{% endcall %}
+{% if r.status == 'CANCELLED' %}<div class="alert alert-secondary"><i class="bi bi-x-circle"></i> This request was cancelled.</div>
+{% else %}<div class="rs-card mb-4"><div class="rs-card-b">{{ tracker(r.status) }}{% if r.status not in ('COMPLETED',) %}<div class="small text-muted"><i class="bi bi-arrow-repeat"></i> This page refreshes automatically.</div>{% endif %}</div></div>{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">Assigned mechanic</div><div class="rs-card-b">
+    {% if r.mechanic_name and r.assignment_response != 'REJECTED' %}
+      <div class="d-flex align-items-center gap-3"><div class="rs-logo" style="width:56px;height:56px;font-size:1.6rem;margin:0"><i class="bi bi-person-gear"></i></div>
+        <div><h5 class="mb-0">{{ r.mechanic_name }}</h5><div>{{ stars(r.mechanic_rating|round(0)|int) }} <span class="small text-muted">{{ r.mechanic_rating }}</span></div>
+        <div class="small"><i class="bi bi-telephone"></i> {{ r.mechanic_phone }}</div></div></div>
+      <p class="mt-3 mb-0 small text-muted">{% if r.assignment_response == 'PENDING' %}Waiting for the mechanic to accept…{% else %}Accepted at {{ r.assigned_at|dt }}.{% endif %} Assigned by {{ r.assigned_by|lower }}.</p>
+    {% else %}<p class="text-muted mb-0"><i class="bi bi-hourglass-split"></i> No mechanic assigned yet. We are finding the best match for you.</p>{% endif %}
+  </div></div></div>
+  <div class="col-lg-6"><div class="rs-card h-100"><div class="rs-card-h">Request details</div><div class="rs-card-b small">
+    <div class="row g-2">
+      <div class="col-5 text-muted">Location</div><div class="col-7">{{ r.address_line }}, {{ r.city }} {{ r.pincode or '' }}{% if r.landmark %}<br><span class="text-muted">Near {{ r.landmark }}</span>{% endif %}</div>
+      <div class="col-5 text-muted">Vehicle</div><div class="col-7">{{ r.vehicle_name }} ({{ r.registration_no }})</div>
+      <div class="col-5 text-muted">Problem</div><div class="col-7">{{ r.description or '-' }}</div>
+      <div class="col-5 text-muted">Requested</div><div class="col-7">{{ r.requested_at|dt }}</div>
+      {% if r.completed_at %}<div class="col-5 text-muted">Completed</div><div class="col-7">{{ r.completed_at|dt }}</div>
+      <div class="col-5 text-muted">Work done</div><div class="col-7">{{ r.resolution_notes or '-' }}</div>{% endif %}
+      <div class="col-5 text-muted">Estimated charge</div><div class="col-7 fw-bold">{{ r.estimated_cost|money }}</div>
+    </div></div></div></div>
+
+  {% if r.payment_id %}
+  <div class="col-lg-6"><div class="rs-card"><div class="rs-card-h">Bill {{ pay_status(r.payment_status) }}</div><div class="rs-card-b">
+    <table class="table table-sm mb-3"><tr><td>Service charge</td><td class="text-end">{{ r.service_charge|money }}</td></tr><tr><td>Parts / extra work</td><td class="text-end">{{ r.parts_charge|money }}</td></tr><tr class="fw-bold"><td>Total</td><td class="text-end">{{ r.total_amount|money }}</td></tr></table>
+    {% if r.payment_status == 'PAID' %}<div class="small text-muted">Paid by {{ r.payment_method }} on {{ r.paid_at|dt }}<br>Ref: <code>{{ r.transaction_ref }}</code></div>
+    {% else %}<a class="btn btn-signal w-100" href="{{ url_for('customer.pay', rid=r.request_id) }}"><i class="bi bi-credit-card"></i> Pay {{ r.total_amount|money }}</a>{% endif %}
+  </div></div></div>{% endif %}
+  {% if r.status == 'COMPLETED' %}
+  <div class="col-lg-6"><div class="rs-card"><div class="rs-card-h">Your feedback</div><div class="rs-card-b">
+    {% if r.feedback_id %}<div class="fs-4">{{ stars(r.rating) }}</div><p class="mb-0">{{ r.feedback_comments or 'No comment.' }}</p>
+    {% else %}<p>How was your experience with {{ r.mechanic_name }}?</p><a class="btn btn-primary" href="{{ url_for('customer.feedback_form', rid=r.request_id) }}"><i class="bi bi-star"></i> Rate this service</a>{% endif %}
+  </div></div></div>{% endif %}
+</div></div>
+{% endblock %}

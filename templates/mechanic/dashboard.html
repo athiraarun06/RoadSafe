@@ -1,0 +1,33 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, status, priority, stars, empty %}
+{% block title %}Mechanic dashboard{% endblock %}
+{% block content %}
+{% call head('Hello, ' ~ me.full_name.split(' ')[0], me.city ~ ' · ' ~ me.experience_years ~ ' years experience') %}
+<form method="post" action="{{ url_for('mechanic.availability') }}">
+  <button class="btn {{ 'btn-success' if me.is_available else 'btn-outline-secondary' }} btn-lg"><i class="bi bi-{{ 'toggle-on' if me.is_available else 'toggle-off' }}"></i> {{ 'ONLINE - taking jobs' if me.is_available else 'OFFLINE - tap to go online' }}</button></form>
+{% endcall %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="stat warn"><div class="lbl">Active jobs</div><div class="rs-num">{{ me.active_jobs }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Completed jobs</div><div class="rs-num">{{ me.completed_jobs }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Earnings (paid)</div><div class="rs-num">{{ me.total_earnings|money }}</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="lbl">Rating</div><div class="rs-num">{{ me.avg_rating }} <i class="bi bi-star-fill text-warning fs-5"></i></div></div></div>
+</div>
+{% if new_jobs %}
+<div class="rs-card mb-4 border-warning"><div class="rs-card-h bg-warning-subtle"><span><i class="bi bi-bell-fill"></i> New assignments - respond now</span></div><div class="rs-card-b">
+{% for r in new_jobs %}
+<div class="row g-3 align-items-center {{ 'border-top pt-3 mt-3' if not loop.first }}">
+  <div class="col-md-6"><div class="d-flex gap-2 align-items-center mb-1"><strong>#{{ r.request_id }} {{ r.service_name }}</strong> {{ priority(r.priority) }}</div>
+    <div class="small text-muted">{{ r.vehicle_name }} · {{ r.address_line }}, {{ r.city }}</div><div class="small">{{ r.description or '' }}</div></div>
+  <div class="col-md-6 text-md-end">
+    <form method="post" action="{{ url_for('mechanic.respond', rid=r.request_id) }}" class="d-inline"><input type="hidden" name="decision" value="accept"><button class="btn btn-success"><i class="bi bi-check-lg"></i> Accept</button></form>
+    <form method="post" action="{{ url_for('mechanic.respond', rid=r.request_id) }}" class="d-inline" data-confirm="Reject this request?"><input type="hidden" name="decision" value="reject"><input type="hidden" name="reason" value="Not able to take this job"><button class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> Reject</button></form>
+    <a href="{{ url_for('mechanic.request_detail', rid=r.request_id) }}" class="btn btn-outline-primary">Details</a></div>
+</div>{% endfor %}</div></div>{% endif %}
+<div class="row g-4">
+  <div class="col-lg-7"><div class="rs-card h-100"><div class="rs-card-h">Jobs in progress</div><div class="rs-card-b p-0">
+    {% if active %}<ul class="list-group list-group-flush">{% for r in active %}<li class="list-group-item d-flex justify-content-between align-items-center"><div><strong>#{{ r.request_id }} {{ r.service_name }}</strong> {{ status(r.status) }}<div class="small text-muted">{{ r.customer_name }} · {{ r.city }}</div></div><a class="btn btn-sm btn-primary" href="{{ url_for('mechanic.request_detail', rid=r.request_id) }}">Update</a></li>{% endfor %}</ul>
+    {% else %}{{ empty('No jobs in progress.', 'bi-cone-striped') }}{% endif %}</div></div></div>
+  <div class="col-lg-5"><div class="rs-card mb-4"><div class="rs-card-h">My services</div><div class="rs-card-b">{% for s in services %}<span class="badge text-bg-light border me-1 mb-1"><i class="bi {{ s.icon }}"></i> {{ s.service_name }}</span>{% endfor %}</div></div>
+    <div class="rs-card"><div class="rs-card-h">Latest reviews <a href="{{ url_for('mechanic.ratings') }}" class="small">All</a></div><div class="rs-card-b">
+    {% for v in reviews %}<div class="{{ 'border-top pt-2 mt-2' if not loop.first }}">{{ stars(v.rating) }}<div class="small">{{ v.feedback_comments or 'No comment' }}</div><div class="small text-muted">{{ v.customer_name }} · {{ v.service_name }}</div></div>{% else %}<span class="text-muted">No reviews yet.</span>{% endfor %}</div></div></div>
+</div>
+{% endblock %}

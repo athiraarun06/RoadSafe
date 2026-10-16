@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}All requests{% endblock %}
+{% block content %}
+{{ head('Assistance requests', 'Filter, open and assign requests.') }}
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto"><select name="status" class="form-select">{% for s in [''] + STATUS_FLOW + ['CANCELLED'] %}<option value="{{ s }}" {{ 'selected' if s == status }}>{{ s|pretty or 'All statuses' }}</option>{% endfor %}</select></div>
+  <div class="col-auto"><select name="priority" class="form-select">{% for p in ['','LOW','MEDIUM','HIGH','EMERGENCY'] %}<option value="{{ p }}" {{ 'selected' if p == priority }}>{{ p|pretty or 'All priorities' }}</option>{% endfor %}</select></div>
+  <div class="col-auto"><button class="btn btn-primary">Filter</button> <a class="btn btn-outline-secondary" href="{{ url_for('admin.requests_list') }}">Reset</a></div>
+</form>
+<div class="rs-card"><div class="rs-card-b p-0">{% with pfx='admin' %}{% include '_request_table.html' %}{% endwith %}</div></div>
+{% endblock %}

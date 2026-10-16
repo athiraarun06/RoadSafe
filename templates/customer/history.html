@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty, stars, pay_status %}
+{% block title %}Service history{% endblock %}
+{% block content %}
+{{ head('Service history', 'A permanent record of every completed rescue.') }}
+{% if rows %}<div class="vstack gap-3">{% for h in rows %}
+<div class="rs-card"><div class="rs-card-b"><div class="row g-3 align-items-center">
+  <div class="col-md-5"><div class="d-flex gap-3"><div class="svc-ico mb-0"><i class="bi {{ h.service_icon }}"></i></div><div><h5 class="mb-0">{{ h.service_name }}</h5><div class="small text-muted">{{ h.vehicle_name }} · {{ h.registration_no }}</div><div class="small text-muted">{{ h.address_line }}, {{ h.city }}</div></div></div></div>
+  <div class="col-md-4 small"><div><i class="bi bi-person-gear"></i> {{ h.mechanic_name }}</div><div><i class="bi bi-calendar-check"></i> {{ h.completed_at|dt }}</div><div><i class="bi bi-stopwatch"></i> {{ h.duration_minutes }} min · {{ h.work_summary or '' }}</div></div>
+  <div class="col-md-3 text-md-end"><div class="rs-num fs-4">{{ h.total_cost|money }}</div>{{ pay_status(h.payment_status) }}<div>{% if h.rating %}{{ stars(h.rating) }}{% else %}<a href="{{ url_for('customer.feedback_form', rid=h.request_id) }}" class="small">Rate service</a>{% endif %}</div></div>
+</div></div></div>{% endfor %}</div>
+{% else %}<div class="rs-card">{{ empty('No completed services yet.', 'bi-clock-history') }}</div>{% endif %}
+{% endblock %}

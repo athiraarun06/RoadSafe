@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% from '_macros.html' import head, empty, stars, pay_status %}
+{% block title %}Completed jobs{% endblock %}
+{% block content %}
+{{ head('Completed jobs', 'Your service history.') }}
+<div class="rs-card"><div class="rs-card-b p-0">
+{% if rows %}<div class="table-wrap"><table class="table rs-table table-hover"><thead><tr><th>#</th><th>Service</th><th>Customer</th><th>Vehicle</th><th>Completed</th><th>Duration</th><th>Amount</th><th>Payment</th><th>Rating</th></tr></thead><tbody>
+{% for h in rows %}<tr><td><a href="{{ url_for('mechanic.request_detail', rid=h.request_id) }}">#{{ h.request_id }}</a></td><td>{{ h.service_name }}</td><td>{{ h.customer_name }}</td><td>{{ h.vehicle_name }}</td><td class="small">{{ h.completed_at|dt }}</td><td>{{ h.duration_minutes }} min</td><td class="fw-bold">{{ h.total_cost|money }}</td><td>{{ pay_status(h.payment_status) }}</td><td>{{ stars(h.rating) if h.rating else '-' }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}{{ empty('No completed jobs yet.') }}{% endif %}</div></div>
+{% endblock %}

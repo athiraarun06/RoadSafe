@@ -1,0 +1,66 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}Request assistance{% endblock %}
+{% block content %}
+{{ head('Request roadside assistance', 'Tell us what happened and where you are. We will recommend the best mechanic instantly.') }}
+{% if not vehicles %}
+<div class="alert alert-warning">You need to add a vehicle before requesting help. <a href="{{ url_for('customer.vehicle_add') }}" class="alert-link">Add a vehicle</a></div>
+{% else %}
+<form method="post" class="row g-4">
+  <div class="col-lg-8">
+    <div class="rs-card mb-4"><div class="rs-card-h">1 · What is the problem?</div><div class="rs-card-b"><div class="row g-3">
+      {% for s in services %}
+      <div class="col-6 col-md-4">
+        <input type="radio" class="btn-check" name="service_id" id="s{{ s.service_id }}" value="{{ s.service_id }}" data-base="{{ s.base_charge }}"
+               {{ 'checked' if (f.service_id or preset_service|string) == s.service_id|string }} required>
+        <label class="service-opt border rounded-3 p-3 d-block h-100" for="s{{ s.service_id }}">
+          <i class="bi {{ s.icon }} fs-3 text-success"></i><div class="fw-bold">{{ s.service_name }}</div><div class="small text-muted">from {{ s.base_charge|money }}</div>
+        </label></div>
+      {% endfor %}
+    </div></div></div>
+
+    <div class="rs-card mb-4"><div class="rs-card-h">2 · Vehicle & urgency</div><div class="rs-card-b row g-3">
+      <div class="col-md-6"><label class="form-label">Vehicle *</label>
+        <select name="vehicle_id" class="form-select" required>{% for v in vehicles %}<option value="{{ v.vehicle_id }}" {{ 'selected' if f.vehicle_id == v.vehicle_id|string }}>{{ v.make }} {{ v.model }} · {{ v.registration_no }}</option>{% endfor %}</select></div>
+      <div class="col-md-6"><label class="form-label">Priority *</label>
+        <select name="priority" id="priority" class="form-select">
+          {% for p, t in [('LOW','Low - can wait (-10%)'),('MEDIUM','Medium - standard'),('HIGH','High - need help soon (+25%)'),('EMERGENCY','Emergency - unsafe situation (+50%)')] %}
+          <option value="{{ p }}" {{ 'selected' if (f.priority or 'MEDIUM') == p }}>{{ t }}</option>{% endfor %}</select></div>
+      <div class="col-12"><label class="form-label">Describe the problem</label><textarea name="description" class="form-control" rows="2" maxlength="500" placeholder="E.g. engine makes a clicking sound and will not start">{{ f.description }}</textarea></div>
+    </div></div>
+
+    <div class="rs-card"><div class="rs-card-h">3 · Where are you?</div><div class="rs-card-b row g-3">
+      <div class="col-12"><label class="form-label">Address / road *</label><input name="address" class="form-control" value="{{ f.address }}" required placeholder="Street, road or highway with kilometre mark"></div>
+      <div class="col-md-5"><label class="form-label">City *</label><input name="city" class="form-control" value="{{ f.city or me.city or '' }}" required></div>
+      <div class="col-md-3"><label class="form-label">Pincode</label><input name="pincode" class="form-control" maxlength="10" value="{{ f.pincode }}"></div>
+      <div class="col-md-4"><label class="form-label">Landmark</label><input name="landmark" class="form-control" value="{{ f.landmark }}"></div>
+      <div class="col-md-4"><label class="form-label">Latitude</label><input name="latitude" id="lat" class="form-control" value="{{ f.latitude }}" placeholder="optional"></div>
+      <div class="col-md-4"><label class="form-label">Longitude</label><input name="longitude" id="lng" class="form-control" value="{{ f.longitude }}" placeholder="optional"></div>
+      <div class="col-md-4 d-flex align-items-end"><button type="button" class="btn btn-outline-primary w-100" id="geo"><i class="bi bi-crosshair"></i> Use my location</button></div>
+    </div></div>
+  </div>
+  <div class="col-lg-4"><div class="rs-card position-sticky" style="top:1rem"><div class="rs-card-b">
+    <h5 class="fw-bold">Estimated service charge</h5>
+    <div class="rs-num display-5 text-success" id="estimate">₹0</div>
+    <p class="small text-muted">Base charge × priority factor. Parts or extra work are added by the mechanic after the job.</p>
+    <ul class="small text-muted ps-3"><li>The best available mechanic is selected automatically.</li><li>You can cancel until work starts.</li></ul>
+    <button class="btn btn-signal btn-lg w-100"><i class="bi bi-send"></i> Request help now</button>
+  </div></div></div>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+const factor = {LOW: 0.9, MEDIUM: 1, HIGH: 1.25, EMERGENCY: 1.5};   // same factors as fn_estimate_cost()
+function updateEstimate() {
+  const sel = document.querySelector('input[name=service_id]:checked'), pr = document.getElementById('priority');
+  if (!sel || !pr) return;
+  document.getElementById('estimate').textContent = '₹' + (parseFloat(sel.dataset.base) * factor[pr.value]).toLocaleString('en-IN', {minimumFractionDigits: 2});
+}
+document.querySelectorAll('input[name=service_id], #priority').forEach(e => e.addEventListener('change', updateEstimate));
+updateEstimate();
+const geo = document.getElementById('geo');
+if (geo) geo.addEventListener('click', () => navigator.geolocation
+  ? navigator.geolocation.getCurrentPosition(p => { lat.value = p.coords.latitude.toFixed(6); lng.value = p.coords.longitude.toFixed(6); }, () => alert('Could not read your location.'))
+  : alert('Geolocation is not supported by this browser.'));
+</script>
+{% endblock %}

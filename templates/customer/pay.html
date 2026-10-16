@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% from '_macros.html' import head %}
+{% block title %}Pay bill{% endblock %}
+{% block content %}
+{{ head('Pay for request #' ~ r.request_id, r.service_name) }}
+{% if r.payment_status == 'PAID' %}<div class="alert alert-success">This bill is already paid. Reference <code>{{ r.transaction_ref }}</code>.</div>{% else %}
+<div class="row g-4"><div class="col-lg-5"><div class="rs-card"><div class="rs-card-h">Bill summary</div><div class="rs-card-b">
+  <table class="table table-sm"><tr><td>Service charge ({{ r.priority|pretty }})</td><td class="text-end">{{ r.service_charge|money }}</td></tr><tr><td>Parts / extra work</td><td class="text-end">{{ r.parts_charge|money }}</td></tr><tr class="fw-bold fs-5"><td>Total</td><td class="text-end">{{ r.total_amount|money }}</td></tr></table>
+  <p class="small text-muted mb-0">Mechanic: {{ r.mechanic_name }}</p></div></div></div>
+<div class="col-lg-7"><div class="rs-card"><div class="rs-card-h">Choose payment method</div><div class="rs-card-b">
+<form method="post" data-confirm="Confirm payment of {{ r.total_amount|money }}?">
+  <div class="row g-3 mb-3">
+    {% for m, ic, t in [('CASH','bi-cash-stack','Cash to mechanic'),('UPI','bi-phone','UPI'),('CARD','bi-credit-card-2-front','Credit / debit card')] %}
+    <div class="col-md-4"><input type="radio" name="method" id="m{{ m }}" value="{{ m }}" class="btn-check" required {{ 'checked' if m == 'UPI' }}>
+      <label for="m{{ m }}" class="service-opt border rounded-3 p-3 d-block text-center h-100"><i class="bi {{ ic }} fs-2 text-success"></i><div class="fw-bold">{{ m|title }}</div><div class="small text-muted">{{ t }}</div></label></div>{% endfor %}
+  </div>
+  <div id="upi" class="mb-3 pay-extra"><label class="form-label">UPI ID (demo - not stored)</label><input class="form-control" placeholder="name@bank"></div>
+  <div id="card" class="row g-2 mb-3 pay-extra d-none"><div class="col-12"><label class="form-label">Card number (demo - not stored)</label><input class="form-control" placeholder="4111 1111 1111 1111" maxlength="19"></div><div class="col-6"><input class="form-control" placeholder="MM/YY"></div><div class="col-6"><input class="form-control" placeholder="CVV" maxlength="3"></div></div>
+  <div class="alert alert-light border small"><i class="bi bi-shield-check"></i> Simulated payment: no real money moves. The database stores only the method and a generated transaction reference.</div>
+  <button class="btn btn-signal btn-lg w-100">Pay {{ r.total_amount|money }}</button>
+</form></div></div></div></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll('input[name=method]').forEach(r => r.addEventListener('change', () => {
+  document.querySelectorAll('.pay-extra').forEach(e => e.classList.add('d-none'));
+  const t = document.getElementById(r.value.toLowerCase()); if (t && r.checked) t.classList.remove('d-none'); }));
+</script>{% endblock %}
